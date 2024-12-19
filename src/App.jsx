@@ -1,24 +1,129 @@
-import "./App.scss";
+import React, { useState } from 'react'
 import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-  RouterProvider,
-} from "react-router-dom";
-import Dashboard from "./pages/dashboard.jsx";
-import MemoryCard from "./game/index.jsx";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import FormOne from './views/forms/formOne';
+import FromTwo from './views/forms/formTwo';
+import FromThree from './views/forms/fromThree';
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/customModal"
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { User } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
-const App = () => {
-  const router = createBrowserRouter(
-    createRoutesFromElements(
-      <Route>
-        <Route index element={<MemoryCard />} />
-        <Route path='/task2' element={<Dashboard />} />
-      </Route>
-    )
-  );
+function App() {
 
-  return <RouterProvider router={router} />;
-};
+  const [activetab, setActiveTab] = useState(0);
+  const [open, setOpen] = useState(false);
+  const usersList = useSelector((state) => state.adduser)
 
-export default App;
+  const toggler = () => {
+    setOpen(false)
+  }
+
+  const nextStep = () => {
+    setActiveTab(activetab + 1);
+  };
+
+  const prevStep = () => {
+    setActiveTab(activetab - 1);
+  };
+
+  const Formsteps = () => {
+    switch (activetab) {
+      case 0:
+        return <FormOne nextStep={nextStep} prevStep={prevStep} />
+      case 1:
+        return <FromTwo nextStep={nextStep} prevStep={prevStep} />
+      case 2:
+        return <FromThree toggler={toggler} prevStep={prevStep} />
+      default:
+        return <></>
+    }
+  }
+
+  return (
+    <div className='bg-[#F5F5F5] min-h-screen p-4'>
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>User List</CardTitle>
+            <Button className="flex gap-2 items-center" onClick={() => setOpen(!open)}>
+              <User size={20} />
+              Add User
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">S.NO</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Mobile</TableHead>
+                <TableHead>Gender</TableHead>
+                <TableHead>Address</TableHead>
+              </TableRow>
+            </TableHeader>
+            {usersList.length > 0 ?
+              <TableBody>
+                {usersList.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">{index + 1}</TableCell>
+                    <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.email}</TableCell>
+                    <TableCell>{row.mobile}</TableCell>
+                    <TableCell>{row.gender}</TableCell>
+                    <TableCell>
+                      {row.line1}
+                      {row.line2}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              :
+              <TableCaption className="my-12">
+                No data found.
+              </TableCaption>
+            }
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Dialog open={open} onOpenChange={setOpen} >
+        <DialogContent className="sm:max-w-[50vw]">
+          <DialogHeader>
+            <DialogTitle>Add user</DialogTitle>
+            <DialogDescription>
+              Fill all your requested details here.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='mt-6'>
+            {Formsteps()}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
+export default App
