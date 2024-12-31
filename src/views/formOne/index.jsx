@@ -6,22 +6,22 @@ import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod';
 import { useDispatch, useSelector } from 'react-redux'
-import { addUser } from '../../redux/firstForm'
+import { firstForm } from '../../redux/firstForm'
 
 const Validationschema = z.object({
     name: z.string({
-        required_error: "This field is required"
+        required_error: "Name is required"
     }).regex(/[A-z0-9_]+$/, "only alpha-numeric char are allowed."),
     email: z.string({
-        required_error: "This field is required"
+        required_error: "Email is required"
     }).email(),
     password: z.string({
-        required_error: "This field is required"
+        required_error: "Password is required"
     })
         .min(8, { message: "Password is too short" })
         .max(20, { message: "Password is too long" }),
     conpassword: z.string({
-        required_error: "This field is required"
+        required_error: "Confirm password is required"
     }),
 
 }).refine((data) => data.password === data.conpassword, {
@@ -44,7 +44,8 @@ function FormOne({ nextStep, prevStep }) {
     const toggleCon = () => setConshow(!Conshow);
 
     const onsubmit = async (data) => {
-        await dispatch(addUser(data))
+        // alert('Form submitted successfully')
+        await dispatch(firstForm(data))
         nextStep()
     }
 
@@ -58,12 +59,13 @@ function FormOne({ nextStep, prevStep }) {
                     render={({ field }) => (
                         <Input {...field}
                             type="text"
+                            data-testid="name"
                             className='border border-gray-300 rounded-lg'
                             placeholder="Enter your name"
                         />
                     )}
                 />
-                {errors.name && <span className='text-red-500 text-sm'>{errors.name.message}</span>}
+                <span data-testid="nameerror" className='text-red-500 text-sm'>{errors.name && errors.name.message}</span>
             </div>
             <div className="w-full mb-4">
                 <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
@@ -73,12 +75,13 @@ function FormOne({ nextStep, prevStep }) {
                     render={({ field }) => (
                         <Input {...field}
                             type="email"
+                            data-testid="email"
                             className='border border-gray-300 rounded-lg'
                             placeholder="Enter your email"
                         />
                     )}
                 />
-                {errors.email && <span className='text-red-500 text-sm'>{errors.email.message}</span>}
+                {errors.email && <span data-testid="emailError" className='text-red-500 text-sm'>{errors.email.message}</span>}
             </div>
             <div className='w-full mb-4'>
                 <label className="mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
@@ -89,7 +92,8 @@ function FormOne({ nextStep, prevStep }) {
                         render={({ field }) => (
                             <Input {...field}
                                 type={show ? "text" : "password"}
-                                placeholder="••••••••"
+                                placeholder="Password"
+                                data-testid="password"
                                 className="border-y border-l border-gray-300 rounded-s-md flex-1" />
                         )}
                     />
@@ -99,7 +103,7 @@ function FormOne({ nextStep, prevStep }) {
                         {show ? <Eye size={20} /> : <EyeOff size={20} />}
                     </span>
                 </div>
-                {errors.password && <span className='text-red-500 text-sm'>{errors.password.message}</span>}
+                {errors.password && <span data-testid="passwordError" className='text-red-500 text-sm'>{errors.password.message}</span>}
             </div>
             <div className='w-full'>
                 <label className="mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm Password</label>
@@ -110,7 +114,8 @@ function FormOne({ nextStep, prevStep }) {
                         render={({ field }) => (
                             <Input {...field}
                                 type={Conshow ? "text" : "password"}
-                                placeholder="••••••••"
+                                data-testid="confirm"
+                                placeholder="Confirm Password"
                                 className="border-y border-lr border-gray-300 rounded-s-md flex-1" />
                         )}
                     />
@@ -120,12 +125,12 @@ function FormOne({ nextStep, prevStep }) {
                         {Conshow ? <Eye size={20} /> : <EyeOff size={20} />}
                     </span>
                 </div>
-                {errors.conpassword && <span className='text-red-500 text-sm'>{errors.conpassword.message}</span>}
+                {errors.conpassword && <span data-testid="confirmError" className='text-red-500 text-sm'>{errors.conpassword.message}</span>}
             </div>
 
             <div className='flex justify-end my-4'>
                 <Button type="submit" className='flex justify-center items-center gap-2 w-fit'
-                    disabled={!isValid || !isDirty}>
+                    dispatch={!isValid || !isDirty}>
                     Next
                     <ArrowRight size={20} />
                 </Button>

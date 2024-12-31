@@ -16,32 +16,41 @@ import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod';
 import { useDispatch } from 'react-redux'
+import { secondForm } from '../../redux/secondForm'
 
 const Validationschema = z.object({
     mobile: z.string({
-        required_error: "This field is required"
+        required_error: "Mobile is required"
     }).regex(/^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/, 'Invalid Number!')
         .min(8, { message: "Invalid Number" })
         .max(16, { message: "Invalid Number" }),
     date: z.coerce.date({
-        required_error: "This field is required"
+        required_error: "DOB is required",
+        invalid_type_error: "DOB is required",
     }),
     bio: z.string({
-        required_error: "This field is required"
+        required_error: "Bio is required"
     }),
     gender: z.string({
-        required_error: "This field is required"
+        required_error: "Select gender"
     }),
 })
 
 function FromTwo({ nextStep, prevStep }) {
     const { handleSubmit, control, formState: { errors, isValid, isDirty } } = useForm({
         mode: "onTouched",
-        resolver: zodResolver(Validationschema)
+        resolver: zodResolver(Validationschema),
     })
+    const dispatch = useDispatch()
 
     const onsubmit = async (data) => {
-       
+        let obj = {
+            mobile: data.mobile,
+            date: new Date(data.date).toISOString(),
+            bio: data.bio,
+            gender: data.gender,
+        }
+        await dispatch(secondForm(obj))
         nextStep()
     }
 
@@ -56,12 +65,13 @@ function FromTwo({ nextStep, prevStep }) {
                     render={({ field }) => (
                         <Input {...field}
                             type="number"
+                            data-testid='mobileNo'
                             className='border border-gray-300 rounded-lg'
                             placeholder="+91 00000-00000"
                         />
                     )}
                 />
-                {errors.mobile && <span className='text-red-500 text-sm'>{errors.mobile.message}</span>}
+                <span data-testid="mobileerror" className='text-red-500 text-sm'>{errors.mobile && errors.mobile.message}</span>
             </div>
             <div className='w-full mb-4'>
                 <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date of Birth</label>
@@ -70,7 +80,7 @@ function FromTwo({ nextStep, prevStep }) {
                     name="date"
                     render={({ field }) => (
                         <Popover>
-                            <PopoverTrigger asChild>
+                            <PopoverTrigger asChild data-testid='dobdate'>
                                 <Button
                                     variant={"outline"}
                                     className={cn(
@@ -96,7 +106,7 @@ function FromTwo({ nextStep, prevStep }) {
                         </Popover>
                     )}
                 />
-                {errors.date && <span className='text-red-500 text-sm'>{errors.date.message}</span>}
+                <span data-testid="dateerror" className='text-red-500 text-sm'>{errors.date && errors.date.message}</span>
             </div>
             <div className="w-full mb-4">
                 <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Gender</label>
@@ -104,9 +114,9 @@ function FromTwo({ nextStep, prevStep }) {
                     control={control}
                     name='gender'
                     render={({ field }) => (
-                        <RadioGroup onChange={field.onChange} className='flex items-center gap-4'>
+                        <RadioGroup onChange={field.onChange} data-testid='usergender' className='flex items-center gap-4'>
                             <div className="flex items-center gap-2">
-                                <RadioGroupItem name="gender" value="male" id="male" />
+                                <RadioGroupItem name="gender" value="Male" id="male" />
                                 <label htmlFor="male">Male</label>
                             </div>
                             <div className="flex items-center gap-2">
@@ -120,7 +130,7 @@ function FromTwo({ nextStep, prevStep }) {
                         </RadioGroup>
                     )}
                 />
-                {errors.gender && <span className='text-red-500 text-sm'>{errors.gender.message}</span>}
+                <span data-testid="gendererror" className='text-red-500 text-sm'>{errors.gender && errors.gender.message}</span>
             </div>
             <div className="sm:col-span-2">
                 <label htmlFor="bio" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Bio</label>
@@ -130,10 +140,11 @@ function FromTwo({ nextStep, prevStep }) {
                     render={({ field }) => (
                         <Textarea id="bio"
                             {...field}
+                            data-testid='userbio'
                             placeholder="Enter your bio" />
                     )}
                 />
-                {errors.website && <span className='text-red-500 text-sm'>{errors.website.message}</span>}
+                <span data-testid="bioerror" className='text-red-500 text-sm'>{errors.bio && errors.bio.message}</span>
             </div>
 
 
@@ -145,8 +156,7 @@ function FromTwo({ nextStep, prevStep }) {
                     <ArrowLeft size={20} />
                     Previous
                 </Button>
-                <Button type="submit" className='flex justify-center items-center gap-2 w-fit'
-                    disabled={!isValid || !isDirty}>
+                <Button type="submit" className='flex justify-center items-center gap-2 w-fit'>
                     Next
                     <ArrowRight size={20} />
                 </Button>

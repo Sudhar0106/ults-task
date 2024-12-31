@@ -1,22 +1,28 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-const UserList = createSlice({
+const initialState = {
+    name: "",
+    email: "",
+    password: "",
+    conpassword: "",
+    createdAt: "",
+}
+
+const stepOne = createSlice({
     name: 'todos',
-    initialState: [],
+    initialState,
     reducers: {
-        addUser(state, action) {
-            state.push({
-                name: action.payload.name,
-                email: action.payload.email,
-                password: action.payload.password,
-                conpassword: action.payload.conpassword,
-                createdAt: new Date().toString(),
-            })
+        firstForm(state, action) {
+            state.name = action.payload.name;
+            state.email = action.payload.email;
+            state.password = action.payload.password;
+            state.conpassword = action.payload.conpassword;
+            state.createdAt = new Date().toISOString();
         },
 
     },
 })
 
-export const { addUser } = UserList.actions
-export default UserList.reducer
+export const { firstForm } = stepOne.actions
+export default stepOne.reducer
 

@@ -1,13 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import FormOne from './views/forms/formOne';
-import FromTwo from './views/forms/formTwo';
-import FromThree from './views/forms/fromThree';
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -26,14 +23,30 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { User } from 'lucide-react';
+import { Copy, User } from 'lucide-react';
 import { useSelector } from 'react-redux';
+import moment from 'moment';
+import axios from 'axios';
+import FormOne from './views/formOne'
+import FromTwo from './views/formTwo'
+import FromThree from './views/formThree'
 
 function App() {
 
   const [activetab, setActiveTab] = useState(0);
   const [open, setOpen] = useState(false);
-  const usersList = useSelector((state) => state.adduser)
+  const [usersData, setUsersData] = useState([]);
+  const usersList = useSelector((state) => state.finalForm)
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    await axios.get('http://localhost:3000/api/users').then((res) => {
+      setUsersData(res?.data)
+    })
+  }
 
   const toggler = () => {
     setOpen(false)
@@ -54,7 +67,7 @@ function App() {
       case 1:
         return <FromTwo nextStep={nextStep} prevStep={prevStep} />
       case 2:
-        return <FromThree toggler={toggler} prevStep={prevStep} />
+        return <FromThree toggler={toggler} prevStep={prevStep} resetForm={setActiveTab} />
       default:
         return <></>
     }
@@ -79,23 +92,30 @@ function App() {
                 <TableHead className="w-[100px]">S.NO</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>DOB</TableHead>
                 <TableHead>Mobile</TableHead>
                 <TableHead>Gender</TableHead>
                 <TableHead>Address</TableHead>
               </TableRow>
             </TableHeader>
-            {usersList.length > 0 ?
+            {usersData.length > 0 ?
               <TableBody>
-                {usersList.map((row, index) => (
+                {usersData.map((row, index) => (
                   <TableRow key={index}>
                     <TableCell className="font-medium">{index + 1}</TableCell>
                     <TableCell>{row.name}</TableCell>
-                    <TableCell>{row.email}</TableCell>
+                    <TableCell>
+                      <div className='flex items-center gap-4'>
+                        <p>{row.email}</p>
+                        <Copy size={20} type='button' />
+                      </div>
+                    </TableCell>
+                    <TableCell>{moment(row.date).format("DD/MM/YYYY")}</TableCell>
                     <TableCell>{row.mobile}</TableCell>
                     <TableCell>{row.gender}</TableCell>
                     <TableCell>
-                      {row.line1}
-                      {row.line2}
+                      <p>{row.line1}</p>
+                      <p>{row.line2}</p>
                     </TableCell>
                   </TableRow>
                 ))}

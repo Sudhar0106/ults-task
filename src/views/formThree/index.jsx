@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/select"
 import { ArrowLeft } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
+import { addUser } from '../../redux/finalSubmision'
+import axios from 'axios'
 
 const Validationschema = z.object({
     line1: z.string({
@@ -22,22 +24,26 @@ const Validationschema = z.object({
         required_error: "This field is required"
     }),
     state: z.string({
-        required_error: "This field is required"
+        required_error: "Select state"
     }),
     country: z.string({
-        required_error: "This field is required"
+        required_error: "Select country"
     }),
 })
 
-function FromThree({ toggler, prevStep }) {
+function FromThree({ toggler, prevStep, resetForm }) {
     const { handleSubmit, control, formState: { errors, isValid, isDirty } } = useForm({
         resolver: zodResolver(Validationschema)
     })
-    const usersList = useSelector((state) => state)
+
+    const dispatch = useDispatch()
+    const stepOne = useSelector((state) => state.firstForm)
+    const stepTwo = useSelector((state) => state.secondform)
 
     const onsubmit = async (data) => {
-        console.log(usersList)
-        // toggler()
+        dispatch(addUser({ ...stepOne, ...stepTwo, ...data }))
+        toggler()
+        resetForm(0)
     }
 
     return (
@@ -51,12 +57,13 @@ function FromThree({ toggler, prevStep }) {
                     render={({ field }) => (
                         <Input {...field}
                             type="text"
+                            data-testid='add-line1'
                             className='border border-gray-300 rounded-lg'
                             placeholder="Enter your address"
                         />
                     )}
                 />
-                {errors.line1 && <span className='text-red-500 text-sm'>{errors.line1.message}</span>}
+                <span data-testid='line1error' className='text-red-500 text-sm'>{errors.line1 && errors.line1.message}</span>
             </div>
             <div className="w-full mb-4">
                 <label htmlFor="line2" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Address Line 2</label>
@@ -67,12 +74,13 @@ function FromThree({ toggler, prevStep }) {
                     render={({ field }) => (
                         <Input {...field}
                             type="text"
+                            data-testid='add-line2'
                             className='border border-gray-300 rounded-lg'
                             placeholder="Enter your address"
                         />
                     )}
                 />
-                {errors.line2 && <span className='text-red-500 text-sm'>{errors.line2.message}</span>}
+                <span data-testid='line2error' className='text-red-500 text-sm'>{errors.line2 && errors.line2.message}</span>
             </div>
             <div className="w-full mb-4">
                 <label htmlFor="state" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">State</label>
@@ -81,7 +89,7 @@ function FromThree({ toggler, prevStep }) {
                     name='state'
                     render={({ field }) => (
                         <Select onValueChange={field.onChange}>
-                            <SelectTrigger>
+                            <SelectTrigger data-testid='user-state'>
                                 <SelectValue id="state" placeholder="State" />
                             </SelectTrigger>
                             <SelectContent>
@@ -91,7 +99,7 @@ function FromThree({ toggler, prevStep }) {
                         </Select>
                     )}
                 />
-                {errors.state && <span className='text-red-500 text-sm'>{errors.state.message}</span>}
+                <span data-testid='stateerror' className='text-red-500 text-sm'>{errors.state && errors.state.message}</span>
             </div>
             <div className="w-full mb-4">
                 <label htmlFor="country" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Country</label>
@@ -100,7 +108,7 @@ function FromThree({ toggler, prevStep }) {
                     name='country'
                     render={({ field }) => (
                         <Select onValueChange={field.onChange}>
-                            <SelectTrigger>
+                            <SelectTrigger data-testid='user-country'>
                                 <SelectValue id="country" placeholder="Country" />
                             </SelectTrigger>
                             <SelectContent>
@@ -110,7 +118,7 @@ function FromThree({ toggler, prevStep }) {
                         </Select>
                     )}
                 />
-                {errors.country && <span className='text-red-500 text-sm'>{errors.country.message}</span>}
+                <span data-testid='countryerror' className='text-red-500 text-sm'>{errors.country && errors.country.message}</span>
             </div>
 
 
@@ -122,7 +130,7 @@ function FromThree({ toggler, prevStep }) {
                     <ArrowLeft size={20} />
                     Previous
                 </Button>
-                <Button type="submit" disabled={!isValid || !isDirty}>
+                <Button type="submit">
                     Submit
                 </Button>
             </div>

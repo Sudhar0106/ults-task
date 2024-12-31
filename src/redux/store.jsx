@@ -1,9 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
-import addUserSlice from './firstForm'
+import addUserFirst from './firstForm'
+import addUserSecond from './secondForm'
+import addUserSlice from './finalSubmision'
 
 export const store = configureStore({
     reducer: {
-        adduser: addUserSlice,
+        firstForm: addUserFirst,
+        secondform: addUserSecond,
+        finalForm: addUserSlice,
     },
 })
 
